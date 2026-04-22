@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Técnica — Análisis de Rutas · American Regional Airways</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --bg2:      #1e293b;
+      --bg3:      #334155;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --blue:     #3b82f6;
+      --green:    #10b981;
+      --red:      #f43f5e;
+      --yellow:   #f59e0b;
+      --purple:   #8b5cf6;
+      --cyan:     #06b6d4;
+      --border:   rgba(255,255,255,0.07);
+      --code-bg:  #0d1117;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem 0;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-logo .airline {
+      font-size: .65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .sidebar-logo .doc-title {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-top: .25rem;
+    }
+    .sidebar-logo .project-tag {
+      display: inline-block;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.25);
+      color: var(--blue);
+      font-size: .65rem;
+      padding: .15rem .6rem;
+      border-radius: 20px;
+      margin-top: .4rem;
+    }
+
+    .nav-section {
+      padding: 0 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .nav-section-label {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+    .nav-link {
+      display: block;
+      padding: .3rem .5rem;
+      font-size: .82rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background .15s, color .15s;
+      line-height: 1.4;
+    }
+    .nav-link:hover { background: var(--bg3); color: var(--text); }
+    .nav-link.active { background: rgba(59,130,246,.15); color: var(--blue); }
+    .nav-link .num {
+      display: inline-block;
+      width: 18px;
+      font-size: .7rem;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .sidebar-authors {
+      padding: 1.2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .sidebar-authors .label { font-size: .65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: .5rem; }
+    .author-chip {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .3rem .6rem;
+      background: rgba(16,185,129,.08);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: 20px;
+      font-size: .75rem;
+      color: var(--green);
+      font-weight: 600;
+      margin-bottom: .4rem;
+      width: fit-content;
+    }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      max-width: 900px;
+      padding: 3rem 4rem;
+      overflow-x: hidden;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      padding: 3rem 0 4rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4rem;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.3);
+      color: var(--blue);
+      font-size: .7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: .25rem .9rem;
+      border-radius: 20px;
+      margin-bottom: 1.2rem;
+    }
+    .cover h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.15;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .6rem;
+    }
+    .cover .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+    }
+    .cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .meta-item .icon { font-size: 1rem; }
+    .cover-authors {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+    .cover-author {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(16,185,129,.08);
+      border: 1px solid rgba(16,185,129,.2);
+      color: var(--green);
+      padding: .35rem 1rem;
+      border-radius: 20px;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .cover-summary {
+      margin-top: 2rem;
+      padding: 1.5rem 2rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 12px 12px 0;
+    }
+    .cover-summary p {
+      font-size: .93rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.7;
+    }
+    .cover-summary strong { color: var(--text); }
+
+    /* ── Sections ── */
+    section { margin-bottom: 4.5rem; }
+    section:target { scroll-margin-top: 2rem; }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    h2 .sec-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(59,130,246,.15);
+      border: 1px solid rgba(59,130,246,.3);
+      color: var(--blue);
+      font-size: .78rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 .8rem;
+    }
+    h3::before {
+      content: '▸ ';
+      color: var(--blue);
+      font-size: .8em;
+    }
+
+    p { color: var(--muted); margin-bottom: 1rem; line-height: 1.8; }
+    p strong { color: var(--text); }
+    p em { color: var(--cyan); font-style: normal; }
+
+    /* ── Callout boxes ── */
+    .callout {
+      padding: 1.1rem 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      font-size: .88rem;
+      line-height: 1.7;
+    }
+    .callout-blue  { background: rgba(59,130,246,.07);  border: 1px solid rgba(59,130,246,.2);  border-left: 4px solid var(--blue);   color: #93c5fd; }
+    .callout-green { background: rgba(16,185,129,.07);  border: 1px solid rgba(16,185,129,.2);  border-left: 4px solid var(--green);  color: #6ee7b7; }
+    .callout-red   { background: rgba(244,63,94,.07);   border: 1px solid rgba(244,63,94,.2);   border-left: 4px solid var(--red);    color: #fda4af; }
+    .callout-yellow{ background: rgba(245,158,11,.07);  border: 1px solid rgba(245,158,11,.2);  border-left: 4px solid var(--yellow); color: #fcd34d; }
+    .callout-purple{ background: rgba(139,92,246,.07);  border: 1px solid rgba(139,92,246,.2);  border-left: 4px solid var(--purple); color: #c4b5fd; }
+    .callout .callout-title {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .4rem;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── Code blocks ── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--bg3);
+      border-radius: 10px;
+      padding: 1.4rem 1.6rem;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+    }
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: .82rem;
+      line-height: 1.65;
+    }
+    p code, li code {
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      color: #93c5fd;
+      padding: .05rem .35rem;
+      border-radius: 4px;
+      font-size: .82rem;
+    }
+    .kw  { color: #ff79c6; }
+    .fn  { color: #8be9fd; }
+    .str { color: #f1fa8c; }
+    .num { color: #bd93f9; }
+    .cm  { color: #6272a4; font-style: italic; }
+    .var { color: #f8f8f2; }
+    .op  { color: #ff79c6; }
+
+    /* ── Tables ── */
+    .tbl-container { overflow-x: auto; margin: 1.2rem 0; border-radius: 10px; border: 1px solid var(--bg3); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--bg3);
+      padding: .65rem 1rem;
+      text-align: left;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    tbody td {
+      padding: .65rem 1rem;
+      border-bottom: 1px solid var(--bg3);
+      font-size: .88rem;
+      background: var(--bg2);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--bg3); transition: background .15s; }
+
+    .badge {
+      display: inline-block;
+      padding: .15rem .6rem;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .badge-red    { background: rgba(244,63,94,.15);  color: var(--red);    border: 1px solid rgba(244,63,94,.3);  }
+    .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
+    .badge-green  { background: rgba(16,185,129,.15); color: var(--green);  border: 1px solid rgba(16,185,129,.3); }
+    .badge-blue   { background: rgba(59,130,246,.15); color: var(--blue);   border: 1px solid rgba(59,130,246,.3); }
+
+    /* ── Math formula ── */
+    .formula-box {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    .formula {
+      font-size: 1.35rem;
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      color: var(--text);
+      margin-bottom: .75rem;
+    }
+    .formula sub { font-size: .65em; }
+    .formula-caption { font-size: .8rem; color: var(--muted); }
+    .formula em { color: var(--cyan); font-style: normal; }
+
+    /* ── Stat row ── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .8rem;
+      margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 10px;
+      padding: 1.1rem;
+      text-align: center;
+    }
+    .stat-val { font-size: 1.6rem; font-weight: 800; margin-bottom: .2rem; }
+    .stat-lbl { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+
+    /* ── Model comparison ── */
+    .model-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .model-card {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+    }
+    .model-card.winner {
+      border-color: rgba(16,185,129,.35);
+      background: rgba(16,185,129,.05);
+    }
+    .model-name { font-weight: 700; font-size: .95rem; margin-bottom: .4rem; }
+    .model-acc  { font-size: 2rem; font-weight: 900; margin-bottom: .4rem; }
+    .model-props { font-size: .78rem; color: var(--muted); line-height: 1.7; }
+    .winner-badge {
+      display: inline-block;
+      background: rgba(16,185,129,.15);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,.3);
+      font-size: .68rem;
+      padding: .1rem .5rem;
+      border-radius: 20px;
+      font-weight: 700;
+      margin-top: .3rem;
+    }
+
+    /* ── Category system ── */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+      margin: 1.5rem 0;
+    }
+    .cat-card {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+    }
+    .cat-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+    .cat-label { font-weight: 800; font-size: .95rem; }
+    .cat-count { margin-left: auto; font-size: .78rem; color: var(--muted); }
+    .cat-criteria { font-size: .8rem; color: var(--muted); line-height: 1.6; margin-bottom: .6rem; }
+    .cat-criteria code { background: var(--bg3); color: var(--text); padding: .05rem .3rem; border-radius: 3px; font-size: .78rem; border: none; }
+    .cat-rationale { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+    /* ── Pipeline steps ── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      margin: 1.5rem 0;
+    }
+    .pipe-step {
+      display: flex;
+      gap: .9rem;
+      align-items: flex-start;
+    }
+    .pipe-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(59,130,246,.15);
+      border: 1px solid rgba(59,130,246,.3);
+      color: var(--blue);
+      font-size: .75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+    .pipe-content { flex: 1; }
+    .pipe-title { font-weight: 700; font-size: .88rem; color: var(--text); margin-bottom: .2rem; }
+    .pipe-desc  { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+    .pipe-connector {
+      width: 1px;
+      height: 16px;
+      background: var(--bg3);
+      margin-left: 13.5px;
+    }
+
+    /* ── Divider ── */
+    .sec-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 3rem 0;
+    }
+
+    /* ── Conclusion ── */
+    .conclusion-box {
+      background: linear-gradient(135deg, rgba(59,130,246,.06), rgba(16,185,129,.06));
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 14px;
+      padding: 2rem 2.5rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .conclusion-box p {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--muted);
+      max-width: 660px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .conclusion-box strong { color: var(--text); }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0 1rem;
+      margin-top: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* ── Cause cards ── */
+    .cause-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .cause-card {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 12px;
+      padding: 1.3rem 1.5rem;
+    }
+    .cause-header {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      margin-bottom: .8rem;
+    }
+    .cause-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .05rem; }
+    .cause-title { font-weight: 800; font-size: .95rem; color: var(--text); line-height: 1.3; }
+    .cause-routes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      margin-bottom: .75rem;
+    }
+    .route-tag {
+      font-family: monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .15rem .5rem;
+      border-radius: 5px;
+      background: var(--bg3);
+      color: var(--text);
+    }
+    .cause-body { font-size: .82rem; color: var(--muted); line-height: 1.75; }
+    .cause-body strong { color: var(--text); }
+
+    .root-cause-box {
+      background: linear-gradient(135deg, rgba(244,63,94,.05), rgba(245,158,11,.05));
+      border: 1px solid rgba(245,158,11,.25);
+      border-left: 4px solid var(--yellow);
+      border-radius: 0 12px 12px 0;
+      padding: 1.4rem 1.8rem;
+      margin: 1.8rem 0;
+    }
+    .root-cause-box .rc-title {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      font-weight: 700;
+      margin-bottom: .6rem;
+    }
+    .root-cause-box p { color: var(--muted); font-size: .9rem; margin-bottom: .5rem; }
+    .root-cause-box p:last-child { margin-bottom: 0; }
+
+    .pct-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .7rem;
+      margin: 1.2rem 0;
+    }
+    .pct-card {
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 10px;
+      padding: .9rem;
+      text-align: center;
+    }
+    .pct-val  { font-size: 1.4rem; font-weight: 800; margin-bottom: .2rem; }
+    .pct-lbl  { font-size: .72rem; color: var(--muted); line-height: 1.4; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      main { padding: 2rem 1.5rem; }
+      .stat-row, .model-compare, .cat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="airline">American Regional Airways</div>
+    <div class="doc-title">Guía Técnica · Análisis de Rutas</div>
+    <span class="project-tag">USTA 2026-I · Misión 2</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Contenido</div>
+    <a href="#sec1" class="nav-link"><span class="num">1</span>Introducción y Objetivo</a>
+    <a href="#sec2" class="nav-link"><span class="num">2</span>Procesamiento de Datos</a>
+    <a href="#sec3" class="nav-link"><span class="num">3</span>Análisis Estadístico</a>
+    <a href="#sec4" class="nav-link"><span class="num">4</span>Distancia vs. Retrasos</a>
+    <a href="#sec5" class="nav-link"><span class="num">5</span>Score de Impacto</a>
+    <a href="#sec6" class="nav-link"><span class="num">6</span>Validación con ML</a>
+    <a href="#sec7" class="nav-link"><span class="num">7</span>Sistema de Clasificación</a>
+    <a href="#sec8" class="nav-link"><span class="num">8</span>Análisis de Causas Raíz</a>
+    <a href="#sec9" class="nav-link"><span class="num">9</span>Conclusiones</a>
+  </div>
+
+  <div style="padding: 0 1.5rem; margin-top: auto;">
+    <div class="sidebar-authors">
+      <div class="label">Autores</div>
+      <div class="author-chip">👤 Michael Morante</div>
+      <div class="author-chip">👤 German Chamorro</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-badge">✈️ USTA 2026-I &nbsp;·&nbsp; Misión 2 &nbsp;·&nbsp; Departamento de Rutas</div>
+    <h1>Guía Técnica:<br>Análisis de Red de Rutas</h1>
+    <p class="subtitle">American Regional Airways — Identificación y clasificación de rutas mediante análisis estadístico y aprendizaje automático</p>
+
+    <div class="cover-meta">
+      <div class="meta-item"><span class="icon">📊</span> 5,332,914 vuelos analizados</div>
+      <div class="meta-item"><span class="icon">🗺️</span> 4,085 rutas evaluadas</div>
+      <div class="meta-item"><span class="icon">🗓️</span> Dataset: Bureau of Transportation Statistics 2015</div>
+      <div class="meta-item"><span class="icon">🤖</span> scikit-learn · pandas · numpy · matplotlib</div>
+    </div>
+
+    <div class="cover-authors">
+      <div class="cover-author">👤 Michael Morante</div>
+      <div class="cover-author">👤 German Chamorro</div>
+    </div>
+
+    <div class="cover-summary">
+      <p>Este documento detalla la metodología completa empleada para responder la pregunta estratégica del CEO de American Regional Airways: <strong>"¿Qué rutas deberíamos eliminar o reforzar?"</strong> Se describe cada etapa del pipeline analítico, desde la carga y preprocesamiento de 5.3 millones de registros hasta la generación del entregable final <code>analisis_rutas_ceo.csv</code>, pasando por el diseño de una métrica de impacto propia y la validación mediante modelos de clasificación supervisada.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SECCIÓN 1 ═══ -->
+  <section id="sec1">
+    <h2><span class="sec-num">1</span> Introducción y Objetivo de Negocio</h2>
+
+    <p>El <strong>Departamento de Rutas</strong> de American Regional Airways es responsable de definir qué conexiones aéreas forman parte de la red operacional de la compañía. Cada ruta activa representa una promesa de servicio hacia el pasajero y un compromiso de eficiencia operacional ante los accionistas. Una ruta consistentemente problemática no solo afecta la experiencia del viajero, sino que deteriora la reputación de la marca, genera costos operativos adicionales por compensaciones y puede comprometer la ocupación futura de esa conexión.</p>
+
+    <p>El presente análisis parte de la siguiente pregunta estratégica planteada por la dirección general:</p>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">💬 Pregunta del CEO</div>
+      "¿Qué rutas deberíamos eliminar o reforzar para mejorar la puntualidad y la reputación de la aerolínea?"
+    </div>
+
+    <p>Para responder esta pregunta con rigor cuantitativo, se utilizó el dataset histórico de vuelos del año 2015 publicado por el <strong>Bureau of Transportation Statistics (BTS)</strong> de los Estados Unidos. Este registro contiene información de <strong>5,332,914 vuelos domésticos</strong> operados por múltiples aerolíneas, incluyendo el campo <code>DEP_DEL15</code> como variable objetivo binaria: toma el valor <code>1</code> cuando un vuelo experimentó un retraso de salida superior a 15 minutos, y <code>0</code> cuando el vuelo fue puntual.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--blue)">5,332,914</div>
+        <div class="stat-lbl">Vuelos registrados en 2015</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--red)">18.7%</div>
+        <div class="stat-lbl">Tasa general de retrasos (&gt;15 min)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--green)">4,085</div>
+        <div class="stat-lbl">Rutas únicas analizadas (mín. 100 vuelos)</div>
+      </div>
+    </div>
+
+    <p>El análisis se estructura en cuatro preguntas de negocio concretas: identificación de las rutas más problemáticas, identificación de las más puntuales, evaluación del efecto de la distancia sobre los retrasos, y diseño de una recomendación cuantificada de qué rutas eliminar. Este documento sigue el mismo orden del notebook desarrollado, explicando las decisiones técnicas y estadísticas detrás de cada paso.</p>
+
+    <h3>Contexto competitivo del dataset</h3>
+
+    <p>El dataset engloba vuelos de todas las aerolíneas registradas ante el BTS. Antes de segmentar la red de rutas, es útil dimensionar el problema en el contexto del sector:</p>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>Aerolínea</th><th>Código</th><th>Tasa de retraso</th><th>Posición en el sector</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Spirit Airlines</td><td style="font-family:monospace">NK</td><td style="color:var(--red);font-weight:700">27.7%</td><td><span class="badge badge-red">Peor desempeño</span></td></tr>
+          <tr><td>United Airlines</td><td style="font-family:monospace">UA</td><td style="color:var(--yellow);font-weight:700">24.3%</td><td><span class="badge badge-yellow">Alto riesgo</span></td></tr>
+          <tr><td>Promedio del sector</td><td>—</td><td style="color:var(--blue);font-weight:700">18.7%</td><td><span class="badge badge-blue">Referencia</span></td></tr>
+          <tr><td>Hawaiian Airlines</td><td style="font-family:monospace">HA</td><td style="color:var(--green);font-weight:700">7.4%</td><td><span class="badge badge-green">Mejor desempeño</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Este contexto establece que la media sectorial del <strong>18.7%</strong> actúa como línea base; cualquier ruta que exceda consistentemente este umbral merece atención prioritaria del Departamento de Rutas.</p>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 2 ═══ -->
+  <section id="sec2">
+    <h2><span class="sec-num">2</span> Metodología de Procesamiento de Datos</h2>
+
+    <h3>2.1 Carga del dataset y creación de variables auxiliares</h3>
+
+    <p>El primer paso del pipeline consiste en cargar el archivo CSV completo con <strong>pandas</strong> y construir las columnas auxiliares necesarias para el análisis de rutas. La carga directa con <code>pd.read_csv()</code> es viable porque el dataset, aunque grande, cabe en memoria RAM al trabajar con tipos de dato nativos de pandas.</p>
+
+    <pre><code><span class="kw">import</span> <span class="var">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># Carga del CSV completo (5.3 M filas)</span>
+<span class="var">df</span> = <span class="var">pd</span>.<span class="fn">read_csv</span>(<span class="str">'../data/flights_2015_full.csv'</span>)
+
+<span class="cm"># Variable objetivo: DEP_DEL15 = 1 → retraso > 15 min</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Dataset: {len(df):,} vuelos"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Tasa retrasos: {df['DEP_DEL15'].mean():.1%}"</span>)
+
+<span class="cm"># Variables auxiliares</span>
+<span class="var">df</span>[<span class="str">'ROUTE'</span>]   = <span class="var">df</span>[<span class="str">'ORIGIN'</span>] + <span class="str">' → '</span> + <span class="var">df</span>[<span class="str">'DEST'</span>]
+<span class="var">df</span>[<span class="str">'DELAYED'</span>] = <span class="var">df</span>[<span class="str">'DEP_DEL15'</span>]
+</code></pre>
+
+    <p>Se crean dos columnas auxiliares con propósito semántico:</p>
+    <ul style="padding-left:1.5rem; color:var(--muted); font-size:.9rem; line-height:2;">
+      <li><code>ROUTE</code>: concatenación legible del par origen–destino en formato <code>ORIGIN → DEST</code>. Esto permite agrupar de forma directa e intuitiva todas las operaciones de una conexión determinada.</li>
+      <li><code>DELAYED</code>: alias semántico de <code>DEP_DEL15</code>, que mejora la legibilidad del código en las operaciones de agregación posteriores.</li>
+    </ul>
+
+    <h3>2.2 Agregación estadística por ruta</h3>
+
+    <p>Una vez construida la columna <code>ROUTE</code>, se procede a colapsar los 5.3 millones de registros individuales en una tabla de estadísticas por ruta mediante <code>groupby</code>. Para cada ruta se calculan tres métricas fundamentales:</p>
+
+    <pre><code><span class="var">route_stats</span> = <span class="var">df</span>.<span class="fn">groupby</span>(<span class="str">'ROUTE'</span>).<span class="fn">agg</span>({
+    <span class="str">'DELAYED'</span>:  [<span class="str">'count'</span>, <span class="str">'mean'</span>],   <span class="cm"># total vuelos + tasa retraso</span>
+    <span class="str">'DISTANCE'</span>: <span class="str">'mean'</span>                  <span class="cm"># distancia promedio en millas</span>
+}).<span class="fn">round</span>(<span class="num">3</span>)
+
+<span class="var">route_stats</span>.<span class="var">columns</span> = [<span class="str">'vuelos'</span>, <span class="str">'tasa_retraso'</span>, <span class="str">'distancia'</span>]
+</code></pre>
+
+    <h3>2.3 Filtrado estadístico por representatividad mínima</h3>
+
+    <p>Antes de calcular tasas de retraso y emitir recomendaciones, se aplica un <strong>filtro de volumen mínimo de 100 vuelos por ruta</strong>. Esta decisión tiene una justificación estadística precisa: una ruta con 5 vuelos de los cuales 3 fueron tardíos exhibiría una tasa del 60%, pero este valor carece de robustez para la toma de decisiones operacionales.</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-title">📐 Razonamiento estadístico del umbral</div>
+      Con un mínimo de 100 observaciones, el error estándar de una proporción muestral p̂ se reduce a:
+      <br><br>
+      <strong>SE = √(p̂·(1–p̂) / n) ≤ √(0.25/100) = 0.05</strong>
+      <br><br>
+      Esto garantiza que el intervalo de confianza al 95% para la tasa de retraso tenga una amplitud máxima de ±10 puntos porcentuales, un nivel de precisión suficiente para las categorías de recomendación definidas.
+    </div>
+
+    <pre><code><span class="cm"># Descartar rutas con muestra no representativa</span>
+<span class="var">route_stats</span> = <span class="var">route_stats</span>[<span class="var">route_stats</span>[<span class="str">'vuelos'</span>] >= <span class="num">100</span>].<span class="fn">copy</span>()
+
+<span class="cm"># Ordenar por tasa de retraso descendente para P1 y P4</span>
+<span class="var">route_stats</span> = <span class="var">route_stats</span>.<span class="fn">sort_values</span>(<span class="str">'tasa_retraso'</span>, ascending=<span class="kw">False</span>)
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Rutas analizadas: {len(route_stats)}"</span>)
+<span class="cm"># → Rutas analizadas: 4085</span>
+</code></pre>
+
+    <p>El resultado es una tabla de <strong>4,085 rutas únicas representativas</strong>, que conforman el universo analítico sobre el cual se ejecutan todas las etapas posteriores del análisis.</p>
+
+    <h3>2.4 Pipeline de procesamiento — resumen</h3>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-num">1</div>
+        <div class="pipe-content">
+          <div class="pipe-title">Carga raw</div>
+          <div class="pipe-desc"><code>pd.read_csv()</code> — 5,332,914 registros, 8 columnas originales del BTS.</div>
+        </div>
+      </div>
+      <div class="pipe-connector"></div>
+      <div class="pipe-step">
+        <div class="pipe-num">2</div>
+        <div class="pipe-content">
+          <div class="pipe-title">Feature engineering</div>
+          <div class="pipe-desc">Creación de <code>ROUTE</code> y <code>DELAYED</code> para facilitar la semántica del análisis.</div>
+        </div>
+      </div>
+      <div class="pipe-connector"></div>
+      <div class="pipe-step">
+        <div class="pipe-num">3</div>
+        <div class="pipe-content">
+          <div class="pipe-title">Agregación por ruta</div>
+          <div class="pipe-desc"><code>groupby('ROUTE').agg()</code> — colapsa 5.3 M filas a una tabla de estadísticas por ruta.</div>
+        </div>
+      </div>
+      <div class="pipe-connector"></div>
+      <div class="pipe-step">
+        <div class="pipe-num">4</div>
+        <div class="pipe-content">
+          <div class="pipe-title">Filtro de representatividad</div>
+          <div class="pipe-desc">Descarte de rutas con menos de 100 vuelos. Resultado: 4,085 rutas analizables.</div>
+        </div>
+      </div>
+      <div class="pipe-connector"></div>
+      <div class="pipe-step">
+        <div class="pipe-num">5</div>
+        <div class="pipe-content">
+          <div class="pipe-title">Clasificación y exportación</div>
+          <div class="pipe-desc">Aplicación del score de impacto y reglas de negocio → <code>analisis_rutas_ceo.csv</code>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 3 ═══ -->
+  <section id="sec3">
+    <h2><span class="sec-num">3</span> Análisis Estadístico y Hallazgos Clave</h2>
+
+    <h3>3.1 Rutas críticas — Top 5 con mayor tasa de retrasos (P1)</h3>
+
+    <p>Con el DataFrame <code>route_stats</code> ordenado de mayor a menor tasa de retraso, el simple <code>.head(5)</code> devuelve las cinco conexiones más problemáticas de la red. Son rutas en las que <strong>más de 4 de cada 10 vuelos</strong> experimenta un retraso superior a 15 minutos en la salida:</p>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Ruta</th><th>Tasa de retraso</th><th>Vuelos/año</th><th>Distancia (mi)</th><th>Observación</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:700;color:var(--red)">1</td>
+            <td style="font-family:monospace;font-weight:700">EWR → PDX</td>
+            <td style="color:var(--red);font-weight:700">50.0%</td>
+            <td>324</td>
+            <td>2,434</td>
+            <td style="font-size:.8rem;color:var(--muted)">1 de cada 2 vuelos retrasado</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">2</td>
+            <td style="font-family:monospace;font-weight:700">EWR → BQN</td>
+            <td style="color:var(--red);font-weight:700">48.8%</td>
+            <td>291</td>
+            <td>1,585</td>
+            <td style="font-size:.8rem;color:var(--muted)">EWR repite como origen crítico</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">3</td>
+            <td style="font-family:monospace;font-weight:700">DEN → HNL</td>
+            <td style="color:var(--yellow);font-weight:700">46.4%</td>
+            <td>334</td>
+            <td>3,365</td>
+            <td style="font-size:.8rem;color:var(--muted)">Vuelo ultralargo transpacífico</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">4</td>
+            <td style="font-family:monospace;font-weight:700">ACY → ORD</td>
+            <td style="color:var(--yellow);font-weight:700">45.6%</td>
+            <td>147</td>
+            <td>720</td>
+            <td style="font-size:.8rem;color:var(--muted)">Volumen bajo — solo 147 vuelos</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">5</td>
+            <td style="font-family:monospace;font-weight:700">DEN → ANC</td>
+            <td style="color:var(--yellow);font-weight:700">45.0%</td>
+            <td>418</td>
+            <td>2,405</td>
+            <td style="font-size:.8rem;color:var(--muted)">Denver–Alaska, condiciones climáticas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-title">🔍 Hallazgo clave — Aeropuerto EWR (Newark Liberty)</div>
+      El aeropuerto de Newark aparece como <strong>origen en 2 de las 5 rutas más problemáticas</strong>. Esto sugiere que la congestión estructural del Hub EWR en el corredor noreste de los EE. UU. es un factor sistémico de retrasos, independientemente del destino. Cualquier ruta que opere desde EWR debe ser monitorizada con especial atención.
+    </div>
+
+    <h3>3.2 Rutas excelentes — Top 5 más puntuales (P2)</h3>
+
+    <p>Para extraer las rutas más puntuales, basta con recuperar los últimos cinco registros del DataFrame (mínima tasa de retraso) e invertir su orden para presentarlos de mejor a peor:</p>
+
+    <pre><code><span class="var">mejores</span> = <span class="var">route_stats</span>.<span class="fn">tail</span>(<span class="num">5</span>).<span class="fn">iloc</span>[::<span class="op">-</span><span class="num">1</span>]
+</code></pre>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Ruta</th><th>Puntualidad</th><th>Vuelos/año</th><th>Destino destacado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--green);font-weight:700">1</td>
+            <td style="font-family:monospace;font-weight:700">SLC → DAL</td>
+            <td style="color:var(--green);font-weight:700">99.1%</td>
+            <td>114</td>
+            <td style="font-size:.8rem;color:var(--muted)">Salt Lake City → Dallas Love Field</td>
+          </tr>
+          <tr>
+            <td style="color:var(--green);font-weight:700">2</td>
+            <td style="font-family:monospace;font-weight:700">SLC → VEL</td>
+            <td style="color:var(--green);font-weight:700">98.0%</td>
+            <td>205</td>
+            <td style="font-size:.8rem;color:var(--muted)">Salt Lake City → Vernal</td>
+          </tr>
+          <tr>
+            <td style="color:var(--green);font-weight:700">3</td>
+            <td style="font-family:monospace;font-weight:700">GTF → MSP</td>
+            <td style="color:var(--green);font-weight:700">97.7%</td>
+            <td>305</td>
+            <td style="font-size:.8rem;color:var(--muted)">Great Falls → Minneapolis</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td style="font-family:monospace;font-weight:700">VEL → SLC</td>
+            <td style="color:var(--green);font-weight:700">97.6%</td>
+            <td>206</td>
+            <td style="font-size:.8rem;color:var(--muted)">Vernal → Salt Lake City (inversa)</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td style="font-family:monospace;font-weight:700">HNL → SLC</td>
+            <td style="color:var(--green);font-weight:700">97.2%</td>
+            <td>324</td>
+            <td style="font-size:.8rem;color:var(--muted)">Honolulu → Salt Lake City</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">✅ Hallazgo clave — Aeropuerto SLC (Salt Lake City)</div>
+      Salt Lake City (SLC) aparece como <strong>origen o destino en 3 de las 5 rutas más puntuales</strong>, consolidándose como el referente operacional de la aerolínea. Sus condiciones favorables (espacio aéreo menos congestionado, clima predecible, gestión eficiente de plataforma) lo posicionan como modelo de buenas prácticas para replicar en otros hubs.
+    </div>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 4 ═══ -->
+  <section id="sec4">
+    <h2><span class="sec-num">4</span> Análisis de Correlación: Distancia vs. Retrasos (P3)</h2>
+
+    <p>Una hipótesis intuitiva es que los vuelos de mayor distancia acumulan más retrasos: más tiempo de vuelo significa más oportunidades para que fallos mecánicos, congestión del espacio aéreo o condiciones climáticas adversas impacten la operación. Para poner a prueba esta hipótesis de forma rigurosa, se aplican dos técnicas complementarias.</p>
+
+    <h3>4.1 Segmentación por quintiles de distancia</h3>
+
+    <p>Se divide el rango total de distancias en <strong>cinco categorías de igual amplitud</strong> usando <code>pd.cut()</code> con <code>bins=5</code>, y se calcula la tasa de retraso media de cada segmento:</p>
+
+    <pre><code><span class="var">df</span>[<span class="str">'dist_cat'</span>] = <span class="var">pd</span>.<span class="fn">cut</span>(
+    <span class="var">df</span>[<span class="str">'DISTANCE'</span>],
+    bins=<span class="num">5</span>,
+    labels=[<span class="str">'Muy Corto'</span>, <span class="str">'Corto'</span>, <span class="str">'Medio'</span>, <span class="str">'Largo'</span>, <span class="str">'Muy Largo'</span>]
+)
+
+<span class="var">result</span> = <span class="var">df</span>.<span class="fn">groupby</span>(<span class="str">'dist_cat'</span>)[<span class="str">'DELAYED'</span>].<span class="fn">mean</span>() * <span class="num">100</span>
+</code></pre>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>Segmento</th><th>Tasa de retraso</th><th>Diferencia vs. media (18.7%)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Muy Corto</td><td style="color:var(--green);font-weight:700">18.2%</td><td style="color:var(--green)">−0.5 pp</td></tr>
+          <tr><td>Corto</td><td style="color:var(--blue);font-weight:700">20.4%</td><td style="color:var(--yellow)">+1.7 pp</td></tr>
+          <tr><td>Medio</td><td style="color:var(--purple);font-weight:700">18.8%</td><td style="color:var(--muted)">+0.1 pp</td></tr>
+          <tr><td>Largo</td><td style="color:var(--yellow);font-weight:700">26.9%</td><td style="color:var(--red)">+8.2 pp</td></tr>
+          <tr><td>Muy Largo</td><td style="color:var(--red);font-weight:700">20.2%</td><td style="color:var(--yellow)">+1.5 pp</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>La variación total entre el segmento de menor tasa (Muy Corto, 18.2%) y el de mayor (Largo, 26.9%) es de <strong>8.7 puntos porcentuales</strong>. Destaca la irregularidad del patrón: el segmento "Largo" tiene mayor tasa que "Muy Largo", lo que rompe cualquier tendencia monotónica ascendente. Este comportamiento no lineal es ya una señal de que no existe una relación simple entre distancia y retrasos.</p>
+
+    <h3>4.2 Correlación de Pearson</h3>
+
+    <p>La correlación de Pearson cuantifica la <strong>fuerza y dirección de la relación lineal</strong> entre dos variables numéricas continuas. Su valor está acotado en el intervalo [−1, +1], donde valores próximos a 0 indican ausencia de relación lineal:</p>
+
+    <pre><code><span class="var">corr</span> = <span class="var">df</span>[<span class="str">'DISTANCE'</span>].<span class="fn">corr</span>(<span class="var">df</span>[<span class="str">'DELAYED'</span>])
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Correlación Pearson: {corr:.3f}"</span>)
+<span class="cm"># → Correlación Pearson: 0.023</span>
+</code></pre>
+
+    <div class="formula-box">
+      <div class="formula">r(DISTANCE, DELAYED) = <em>0.023</em></div>
+      <div class="formula-caption">|r| &lt; 0.10 → relación lineal despreciable (convención estadística estándar)</div>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">📐 Conclusión estadística</div>
+      Con <strong>r = 0.023</strong>, se concluye que <em>la distancia no afecta significativamente la tasa de retrasos</em>. Este coeficiente, calculado sobre 5.3 millones de observaciones, es estadísticamente significativo (p &lt; 0.001 por el tamaño muestral), pero <strong>operacionalmente irrelevante</strong>: solo explica el 0.05% de la varianza en los retrasos (r² = 0.00053). Los factores determinantes son otros: congestión aeroportuaria, clima, problemas de tripulación y eficiencia operacional del aeropuerto origen.
+    </div>
+
+    <p>Esta conclusión tiene implicaciones prácticas importantes para el Departamento de Rutas: no se puede justificar la cancelación o el refuerzo de una ruta basándose únicamente en su distancia. La tasa histórica de retraso de la ruta específica es un predictor mucho más relevante que la longitud del trayecto.</p>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 5 ═══ -->
+  <section id="sec5">
+    <h2><span class="sec-num">5</span> Diseño de la Métrica de Impacto</h2>
+
+    <p>Para responder la pregunta P4 ("¿Si tuvieras que cancelar 3 rutas, cuáles serían?"), una clasificación basada únicamente en la tasa de retraso más alta llevaría a recomendar rutas con apenas 100–150 vuelos anuales. Aunque problemáticas, estas rutas afectan a un número reducido de pasajeros. La decisión óptima de negocio debe ponderar tanto la <strong>gravedad del problema</strong> (qué tan frecuente es el retraso) como el <strong>alcance del daño</strong> (cuántos viajeros se ven afectados).</p>
+
+    <h3>5.1 Definición matemática del Score de Impacto</h3>
+
+    <p>Se diseña la siguiente métrica compuesta, denominada <em>Score de Impacto</em>:</p>
+
+    <div class="formula-box">
+      <div class="formula">
+        Score<sub>impacto</sub> = tasa_retraso &times; ln(vuelos)
+      </div>
+      <div class="formula-caption">
+        donde tasa_retraso ∈ [0,1] y vuelos es el total de operaciones anuales de esa ruta
+      </div>
+    </div>
+
+    <pre><code><span class="var">route_stats</span>[<span class="str">'impacto'</span>] = (
+    <span class="var">route_stats</span>[<span class="str">'tasa_retraso'</span>] * <span class="var">np</span>.<span class="fn">log</span>(<span class="var">route_stats</span>[<span class="str">'vuelos'</span>])
+)
+</code></pre>
+
+    <h3>5.2 Justificación del uso de escala logarítmica</h3>
+
+    <p>La elección de <code>np.log()</code> (logaritmo natural) como función de ponderación del volumen no es arbitraria. Se fundamenta en tres principios:</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-title">🔢 Principio 1 — Compresión de rangos</div>
+      El número de vuelos varía de <strong>100 a ~8,000</strong> por ruta. Si se usara el volumen bruto, una ruta con 8,000 vuelos y tasa del 31% obtendría un score de 2,480, mientras una ruta con 300 vuelos y tasa del 50% obtendría 150. El logaritmo comprime ambos extremos a ln(8000) ≈ 8.99 y ln(300) ≈ 5.70, haciendo que la tasa de retraso conserve su relevancia relativa en el score final.
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-title">🔢 Principio 2 — Ley de rendimientos decrecientes</div>
+      El impacto marginal de un vuelo adicional sobre el daño reputacional no es lineal. Pasar de 100 a 200 vuelos duplica la exposición, pero pasar de 7,000 a 7,100 vuelos apenas la incrementa en un 1.4%. El logaritmo captura esta diminución del impacto marginal de forma matemáticamente correcta.
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-title">🔢 Principio 3 — Interpretabilidad</div>
+      Los scores resultantes caen en un rango compacto y comparable [1.5, 3.1], lo que facilita la comunicación con la dirección general. Un score de 3.0 es aproximadamente el doble de problemático que uno de 1.5, lo que se puede explicar de forma intuitiva.
+    </div>
+
+    <h3>5.3 Top 5 rutas por Score de Impacto — candidatas a cancelación (P4)</h3>
+
+    <p>Se aplican dos filtros de negocio que garantizan que las rutas candidatas a cancelación tienen tanto una tasa de fallo inaceptable como un volumen de operaciones suficiente para justificar la acción:</p>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Ruta</th><th>Tasa retraso</th><th>Vuelos/año</th><th>Distancia (mi)</th><th>Score</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--red);font-weight:700">1</td>
+            <td style="font-family:monospace;font-weight:700">IAH → LAX</td>
+            <td style="color:var(--red);font-weight:700">36.4%</td>
+            <td>4,432</td>
+            <td>1,379</td>
+            <td><span class="badge badge-red">3.06</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td style="font-family:monospace;font-weight:700">SJU → EWR</td>
+            <td style="color:var(--red);font-weight:700">37.0%</td>
+            <td>1,195</td>
+            <td>1,608</td>
+            <td><span class="badge badge-red">2.62</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td style="font-family:monospace;font-weight:700">DFW → HNL</td>
+            <td style="color:var(--red);font-weight:700">35.2%</td>
+            <td>697</td>
+            <td>3,784</td>
+            <td><span class="badge badge-red">2.30</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td style="font-family:monospace;font-weight:700">ORD → SMF</td>
+            <td style="color:var(--red);font-weight:700">36.3%</td>
+            <td>534</td>
+            <td>1,781</td>
+            <td><span class="badge badge-red">2.28</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td style="font-family:monospace;font-weight:700">DFW → OGG</td>
+            <td style="color:var(--red);font-weight:700">35.3%</td>
+            <td>504</td>
+            <td>3,711</td>
+            <td><span class="badge badge-red">2.20</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>La ruta <strong>IAH → LAX</strong> (Houston Intercontinental → Los Ángeles) se posiciona como la candidata principal de cancelación: aunque su tasa de retraso no es la más alta en términos absolutos, sus <strong>4,432 vuelos anuales</strong> la convierten en la que más pasajeros expone a experiencias negativas de forma sistémica, resultando en el score de impacto más alto del dataset (3.06).</p>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 6 ═══ -->
+  <section id="sec6">
+    <h2><span class="sec-num">6</span> Validación mediante Aprendizaje Automático</h2>
+
+    <p>Una vez completado el análisis descriptivo, se incorpora una validación mediante modelos de clasificación supervisada. El objetivo no es necesariamente superar el análisis estadístico previo, sino <strong>confirmar que las variables disponibles contienen poder predictivo</strong> sobre la variable objetivo <code>DELAYED</code>. Si los modelos logran una precisión significativamente superior al baseline (proporción de la clase mayoritaria, es decir 81.3% de vuelos puntuales), se confirma que el dataset es informativo y que las recomendaciones del análisis son robustas.</p>
+
+    <h3>6.1 Configuración del experimento</h3>
+
+    <p>Se entrena sobre una <strong>muestra aleatoria de 50,000 registros</strong> del total de 5.3 millones. Esta decisión se justifica por dos razones prácticas:</p>
+
+    <ul style="padding-left:1.5rem; color:var(--muted); font-size:.9rem; line-height:2.2;">
+      <li><strong>Eficiencia de memoria:</strong> scikit-learn opera en memoria principal. Entrenar sobre el dataset completo requeriría varios GB de RAM, haciéndolo impracticable en entornos estándar de desarrollo.</li>
+      <li><strong>Suficiencia estadística:</strong> 50,000 registros representan el 0.94% del total, pero proporcionan suficiente varianza para estimar los parámetros del modelo con alta estabilidad. La distribución de clases (≈19% positivos) se preserva con <code>random_state=42</code>.</li>
+    </ul>
+
+    <pre><code><span class="kw">from</span> <span class="var">sklearn.model_selection</span> <span class="kw">import</span> <span class="var">train_test_split</span>
+<span class="kw">from</span> <span class="var">sklearn.tree</span>            <span class="kw">import</span> <span class="var">DecisionTreeClassifier</span>
+<span class="kw">from</span> <span class="var">sklearn.ensemble</span>        <span class="kw">import</span> <span class="var">RandomForestClassifier</span>
+<span class="kw">from</span> <span class="var">sklearn.metrics</span>         <span class="kw">import</span> <span class="var">accuracy_score</span>
+
+<span class="cm"># Muestra representativa de 50,000 vuelos</span>
+<span class="var">df_sample</span> = <span class="var">df</span>.<span class="fn">sample</span>(n=<span class="num">50000</span>, random_state=<span class="num">42</span>)
+
+<span class="cm"># Features: solo variables numéricas disponibles en el momento de salida</span>
+<span class="var">X</span> = <span class="var">df_sample</span>[[<span class="str">'MONTH'</span>, <span class="str">'DAY_OF_WEEK'</span>, <span class="str">'DISTANCE'</span>, <span class="str">'DEP_HOUR'</span>]]
+<span class="var">y</span> = <span class="var">df_sample</span>[<span class="str">'DELAYED'</span>]
+
+<span class="cm"># Split: 80% entrenamiento / 20% prueba</span>
+<span class="var">X_train, X_test, y_train, y_test</span> = <span class="fn">train_test_split</span>(
+    <span class="var">X</span>, <span class="var">y</span>, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>
+)
+<span class="cm"># → 40,000 registros de entrenamiento / 10,000 de prueba</span>
+</code></pre>
+
+    <h3>6.2 Modelos entrenados y resultados</h3>
+
+    <div class="model-compare">
+      <div class="model-card winner">
+        <div class="model-name" style="color:var(--green)">🌳 Árbol de Decisión</div>
+        <div class="model-acc" style="color:var(--green)">81.1%</div>
+        <div class="model-props">
+          <strong>Hiperparámetros:</strong> max_depth=5, random_state=42<br>
+          <strong>Ventaja:</strong> Totalmente interpretable — reglas de decisión visualizables<br>
+          <strong>Limitación:</strong> Puede perder patrones complejos por la profundidad acotada
+        </div>
+        <div class="winner-badge">✓ SELECCIONADO — mejor relación precisión/interpretabilidad</div>
+      </div>
+      <div class="model-card">
+        <div class="model-name" style="color:var(--blue)">🌲 Random Forest</div>
+        <div class="model-acc" style="color:var(--blue)">81.1%</div>
+        <div class="model-props">
+          <strong>Hiperparámetros:</strong> n_estimators=50, max_depth=10, n_jobs=2<br>
+          <strong>Ventaja:</strong> Robusto al sobreajuste, captura interacciones no lineales<br>
+          <strong>Limitación:</strong> Caja negra para el CEO — no se puede explicar la decisión individual
+        </div>
+      </div>
+    </div>
+
+    <h3>6.3 Justificación de la selección del modelo</h3>
+
+    <p>Ambos modelos obtienen exactamente el <strong>81.1% de accuracy</strong> sobre el conjunto de prueba. Ante un empate técnico, el criterio de selección se desplaza hacia la <em>utilidad gerencial</em> del modelo:</p>
+
+    <div class="callout callout-green">
+      <div class="callout-title">✅ Por qué se elige el Árbol de Decisión</div>
+      El Árbol de Decisión con <code>max_depth=5</code> produce un árbol de 5 niveles que puede ser visualizado, impreso e interpretado sin conocimientos de machine learning. El CEO puede leer la ruta de decisión como: <em>"Si el vuelo sale en hora punta (DEP_HOUR entre 17-20) y es lunes, la probabilidad de retraso sube al X%"</em>. El Random Forest, con 50 árboles diferentes, produce el mismo número pero no permite este nivel de interpretación. Para la comunicación ejecutiva, la interpretabilidad vale más que 0 décimas de precisión adicionales.
+    </div>
+
+    <h3>6.4 Baseline y significancia del resultado</h3>
+
+    <p>El <strong>baseline ingenuo</strong> (predecir siempre "puntual", la clase mayoritaria) obtendría un accuracy del <strong>81.3%</strong>: la proporción de vuelos sin retraso en el dataset. El hecho de que los modelos obtengan exactamente el 81.1% — ligeramente por debajo del baseline — revela que las cuatro features disponibles (<code>MONTH</code>, <code>DAY_OF_WEEK</code>, <code>DISTANCE</code>, <code>DEP_HOUR</code>) aportan escaso poder predictivo sobre los retrasos en su forma más básica. Esta conclusión es coherente con el hallazgo del análisis de correlación (r = 0.023 para DISTANCE) y sugiere que los retrasos tienen alta varianza no explicada por factores temporales o geográficos simples — probablemente dominada por factores no presentes en el dataset, como la identificación de la tripulación, el historial del avión o el estado operacional del aeropuerto en tiempo real.</p>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 7 ═══ -->
+  <section id="sec7">
+    <h2><span class="sec-num">7</span> Sistema de Clasificación y Exportación</h2>
+
+    <p>La fase final del análisis integra todos los resultados previos en un sistema de clasificación de cuatro categorías, diseñado para entregar al CEO un documento de trabajo accionable. Cada ruta de las 4,085 analizadas recibe una etiqueta que determina la acción operacional recomendada.</p>
+
+    <h3>7.1 Definición de las cuatro categorías</h3>
+
+    <div class="cat-grid">
+      <div class="cat-card" style="border-color:rgba(244,63,94,.3)">
+        <div class="cat-header">
+          <span style="font-size:1.1rem">❌</span>
+          <span class="cat-label" style="color:var(--red)">CANCELAR</span>
+          <span class="cat-count">5 rutas (0.1%)</span>
+        </div>
+        <div class="cat-criteria">
+          Criterio: <code>tasa_retraso &gt; 35%</code> <strong>Y</strong> <code>vuelos &gt; 500</code>
+        </div>
+        <div class="cat-rationale">
+          Rutas con fallo sistemático severo y volumen de pasajeros suficiente para generar daño reputacional real. Acción inmediata requerida.
+        </div>
+      </div>
+
+      <div class="cat-card" style="border-color:rgba(245,158,11,.3)">
+        <div class="cat-header">
+          <span style="font-size:1.1rem">⚠️</span>
+          <span class="cat-label" style="color:var(--yellow)">REFORZAR</span>
+          <span class="cat-count">25 rutas (0.6%)</span>
+        </div>
+        <div class="cat-criteria">
+          Criterio: <code>tasa_retraso &gt; 30%</code> <strong>Y</strong> <code>vuelos &gt; 1,000</code>
+        </div>
+        <div class="cat-rationale">
+          Rutas de alto volumen con tasa elevada pero no crítica. La inversión en mejoras operacionales (más personal, slots alternativos) tiene retorno positivo por el número de pasajeros afectados.
+        </div>
+      </div>
+
+      <div class="cat-card" style="border-color:rgba(16,185,129,.3)">
+        <div class="cat-header">
+          <span style="font-size:1.1rem">✅</span>
+          <span class="cat-label" style="color:var(--green)">MANTENER</span>
+          <span class="cat-count">1,273 rutas (31.2%)</span>
+        </div>
+        <div class="cat-criteria">
+          Criterio: <code>tasa_retraso &lt; 15%</code>
+        </div>
+        <div class="cat-rationale">
+          Rendimiento por debajo de la media sectorial (18.7%). Son las rutas que generan valor reputacional y deben mantenerse sin cambios disruptivos. Representan el modelo operacional a seguir.
+        </div>
+      </div>
+
+      <div class="cat-card" style="border-color:rgba(59,130,246,.3)">
+        <div class="cat-header">
+          <span style="font-size:1.1rem">👁️</span>
+          <span class="cat-label" style="color:var(--blue)">MONITOREAR</span>
+          <span class="cat-count">2,782 rutas (68.1%)</span>
+        </div>
+        <div class="cat-criteria">
+          Criterio: <code>resto de casos</code> (sin acción inmediata)
+        </div>
+        <div class="cat-rationale">
+          Rutas en zona gris: problemáticas pero sin el volumen necesario para CANCELAR/REFORZAR, o con volumen alto pero tasas moderadas. Requieren seguimiento periódico y análisis trimestral.
+        </div>
+      </div>
+    </div>
+
+    <h3>7.2 Implementación de la función de clasificación</h3>
+
+    <p>La lógica de clasificación se implementa como una función Python aplicada fila por fila sobre el DataFrame de rutas con <code>apply()</code>. El orden de evaluación de las condiciones respeta la jerarquía de severidad:</p>
+
+    <pre><code><span class="kw">def</span> <span class="fn">recomendacion</span>(<span class="var">row</span>):
+    <span class="kw">if</span>   <span class="var">row</span>[<span class="str">'tasa_retraso_pct'</span>] &gt; <span class="num">35</span> <span class="kw">and</span> <span class="var">row</span>[<span class="str">'vuelos'</span>] &gt; <span class="num">500</span>:
+        <span class="kw">return</span> <span class="str">'CANCELAR'</span>
+    <span class="kw">elif</span> <span class="var">row</span>[<span class="str">'tasa_retraso_pct'</span>] &gt; <span class="num">30</span> <span class="kw">and</span> <span class="var">row</span>[<span class="str">'vuelos'</span>] &gt; <span class="num">1000</span>:
+        <span class="kw">return</span> <span class="str">'REFORZAR'</span>
+    <span class="kw">elif</span> <span class="var">row</span>[<span class="str">'tasa_retraso_pct'</span>] &lt; <span class="num">15</span>:
+        <span class="kw">return</span> <span class="str">'MANTENER'</span>
+    <span class="kw">else</span>:
+        <span class="kw">return</span> <span class="str">'MONITOREAR'</span>
+
+<span class="var">rutas_ceo</span>[<span class="str">'recomendacion'</span>] = <span class="var">rutas_ceo</span>.<span class="fn">apply</span>(<span class="var">recomendacion</span>, axis=<span class="num">1</span>)
+</code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-title">⚙️ Nota de diseño — orden de condiciones</div>
+      Las condiciones se evalúan en orden de prioridad descendente (CANCELAR → REFORZAR → MANTENER → MONITOREAR). Esto garantiza que si una ruta cumple los criterios de CANCELAR también cumple los de REFORZAR, el sistema le asigna la categoría más severa correctamente, sin ambigüedad.
+    </div>
+
+    <h3>7.3 Exportación del entregable final</h3>
+
+    <p>El resultado se exporta como <code>analisis_rutas_ceo.csv</code>, un archivo ordenado por score de impacto descendente que permite al CEO o a cualquier analista de negocio navegar directamente desde las rutas más críticas hacia las más saludables:</p>
+
+    <pre><code><span class="cm"># Ordenar por impacto: las más críticas aparecen primero</span>
+<span class="var">rutas_ceo</span> = <span class="var">rutas_ceo</span>.<span class="fn">sort_values</span>(<span class="str">'impacto'</span>, ascending=<span class="kw">False</span>)
+
+<span class="var">rutas_ceo</span>.<span class="fn">to_csv</span>(<span class="str">'../data/analisis_rutas_ceo.csv'</span>)
+</code></pre>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>Columna en el CSV</th><th>Tipo</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-family:monospace">ROUTE</td><td style="color:var(--muted)">string</td><td>Par origen–destino en formato <code>XXX → YYY</code></td></tr>
+          <tr><td style="font-family:monospace">vuelos</td><td style="color:var(--muted)">int</td><td>Total de vuelos registrados en 2015 para esa ruta</td></tr>
+          <tr><td style="font-family:monospace">tasa_retraso_pct</td><td style="color:var(--muted)">float</td><td>Porcentaje de vuelos con retraso &gt;15 min (0–100)</td></tr>
+          <tr><td style="font-family:monospace">distancia</td><td style="color:var(--muted)">float</td><td>Distancia promedio de la ruta en millas</td></tr>
+          <tr><td style="font-family:monospace">impacto</td><td style="color:var(--muted)">float</td><td>Score de impacto = tasa_retraso × ln(vuelos)</td></tr>
+          <tr><td style="font-family:monospace">recomendacion</td><td style="color:var(--muted)">string</td><td>Etiqueta de acción: CANCELAR / REFORZAR / MANTENER / MONITOREAR</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>7.4 Distribución final de las 4,085 rutas</h3>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>Categoría</th><th>Rutas</th><th>% del total</th><th>Acción operacional</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-red">CANCELAR</span></td>
+            <td style="font-weight:700">5</td>
+            <td>0.1%</td>
+            <td style="font-size:.85rem;color:var(--muted)">Suspender operaciones — evaluar con Revenue Management</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-yellow">REFORZAR</span></td>
+            <td style="font-weight:700">25</td>
+            <td>0.6%</td>
+            <td style="font-size:.85rem;color:var(--muted)">Asignar personal adicional, revisar slots y conexiones</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">MANTENER</span></td>
+            <td style="font-weight:700">1,273</td>
+            <td>31.2%</td>
+            <td style="font-size:.85rem;color:var(--muted)">Sin cambios — documentar prácticas para replicar</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-blue">MONITOREAR</span></td>
+            <td style="font-weight:700">2,782</td>
+            <td>68.1%</td>
+            <td style="font-size:.85rem;color:var(--muted)">Análisis trimestral — alertas automáticas si tasa sube 5 pp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 8 — CAUSAS RAÍZ ═══ -->
+  <section id="sec8">
+    <h2><span class="sec-num">8</span> Análisis de Causas Raíz de los Retrasos Críticos</h2>
+
+    <p>Los modelos de machine learning confirmaron que las variables del dataset (<code>MONTH</code>, <code>DAY_OF_WEEK</code>, <code>DISTANCE</code>, <code>DEP_HOUR</code>) apenas explican los retrasos observados. Sin embargo, cruzando los aeropuertos y rutas identificadas como críticas con conocimiento del dominio de aviación comercial, es posible señalar las causas operacionales más probables detrás de cada grupo de rutas problemáticas.</p>
+
+    <div class="root-cause-box">
+      <div class="rc-title">⚠️ Variable más importante ausente en el dataset</div>
+      <p>Según el Bureau of Transportation Statistics, el <strong>retraso por aeronave tardía (Late Aircraft Delay)</strong> explica entre el 25% y 35% de todos los retrasos en aviación doméstica de EE. UU. Un avión realiza 4–5 rotaciones diarias; si el primer vuelo se retrasa, todos los vuelos siguientes de esa aeronave ese día heredan el retraso. Este efecto en cascada es invisible para el modelo porque el dataset solo registra el vuelo individual, no el historial del avión ese día.</p>
+    </div>
+
+    <h3>8.1 Causas por grupo de rutas críticas</h3>
+
+    <div class="cause-grid">
+
+      <div class="cause-card" style="border-color:rgba(244,63,94,.3)">
+        <div class="cause-header">
+          <span class="cause-icon">🏙️</span>
+          <div>
+            <div class="cause-title">Congestión estructural del Hub EWR</div>
+          </div>
+        </div>
+        <div class="cause-routes">
+          <span class="route-tag">EWR → PDX</span>
+          <span class="route-tag">EWR → BQN</span>
+          <span class="route-tag">SJU → EWR</span>
+        </div>
+        <div class="cause-body">
+          Newark (EWR), JFK y LaGuardia (LGA) comparten el mismo espacio aéreo del noreste. La FAA los gestiona como sistema unificado: cuando uno se congestiona, los demás reciben restricciones. EWR es el hub de <strong>United Airlines</strong> (24.3% de retraso base, segunda peor del sector), lo que amplifica el problema. Los programas de <strong>Ground Delay (GDP)</strong> de la FAA se activan con frecuencia en EWR, obligando a los aviones a esperar en tierra antes de poder despegar.
+        </div>
+      </div>
+
+      <div class="cause-card" style="border-color:rgba(245,158,11,.3)">
+        <div class="cause-header">
+          <span class="cause-icon">🌊</span>
+          <div>
+            <div class="cause-title">Operaciones ETOPS sobre el Pacífico</div>
+          </div>
+        </div>
+        <div class="cause-routes">
+          <span class="route-tag">DEN → HNL</span>
+          <span class="route-tag">DFW → HNL</span>
+          <span class="route-tag">DFW → OGG</span>
+        </div>
+        <div class="cause-body">
+          Los vuelos hacia Hawaii requieren certificación <strong>ETOPS</strong> (Extended-range Twin-engine Operations), que exige que el avión esté en condiciones mecánicas perfectas antes de cruzar el océano. Cualquier falla menor que en una ruta doméstica se resuelve con otro avión, aquí implica cancelación o espera de reparación porque no existe desvío posible sobre el Pacífico. Además, suele operar <strong>un solo vuelo diario</strong>: si se retrasa, el pasajero espera hasta el día siguiente.
+        </div>
+      </div>
+
+      <div class="cause-card" style="border-color:rgba(139,92,246,.3)">
+        <div class="cause-header">
+          <span class="cause-icon">🏔️</span>
+          <div>
+            <div class="cause-title">Condiciones climáticas extremas en destino</div>
+          </div>
+        </div>
+        <div class="cause-routes">
+          <span class="route-tag">DEN → ANC</span>
+          <span class="route-tag">ACY → ORD</span>
+        </div>
+        <div class="cause-body">
+          Anchorage (ANC) tiene procedimientos de aproximación complejos por su geografía montañosa y condiciones árticas que varían bruscamente incluso dentro del mismo mes, razón por la cual la variable <code>MONTH</code> no los captura. Chicago O'Hare (ORD) es uno de los aeropuertos con mayor frecuencia de Ground Stop por nieve, viento y hielo. Si el destino cierra temporalmente, el avión espera en origen sin opción de desvío rentable.
+        </div>
+      </div>
+
+      <div class="cause-card" style="border-color:rgba(59,130,246,.3)">
+        <div class="cause-header">
+          <span class="cause-icon">✈️</span>
+          <div>
+            <div class="cause-title">Doble congestión Hub–Hub de alto tráfico</div>
+          </div>
+        </div>
+        <div class="cause-routes">
+          <span class="route-tag">IAH → LAX</span>
+          <span class="route-tag">ORD → SFO</span>
+          <span class="route-tag">ORD → EWR</span>
+        </div>
+        <div class="cause-body">
+          Estas rutas conectan dos aeropuertos que individualmente ya tienen tasas de retraso elevadas. IAH y LAX están entre los más congestionados de EE. UU.; ORD es históricamente el aeropuerto con más retrasos absolutos del país. El avión debe conseguir slot de salida en un hub congestionado y slot de llegada en otro hub congestionado: cualquier desajuste en uno de los dos extremos se traduce en retraso. El volumen de vuelos de estas rutas (>3,000/año) hace que el impacto acumulado sea el más alto del dataset.
+        </div>
+      </div>
+
+    </div>
+
+    <h3>8.2 Distribución estimada de causas en aviación doméstica (BTS 2015)</h3>
+
+    <p>El BTS clasifica oficialmente los retrasos por categoría de causa. Aunque el dataset utilizado no incluye esta desagregación, los porcentajes históricos para vuelos domésticos de EE. UU. en 2015 permiten contextualizar el problema:</p>
+
+    <div class="pct-row">
+      <div class="pct-card">
+        <div class="pct-val" style="color:var(--red)">~33%</div>
+        <div class="pct-lbl">Aeronave tardía (retraso heredado de vuelo anterior)</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-val" style="color:var(--yellow)">~29%</div>
+        <div class="pct-lbl">Carrier (tripulación, mantenimiento, carga)</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-val" style="color:var(--blue)">~24%</div>
+        <div class="pct-lbl">NAS — congestión del espacio aéreo (FAA)</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-val" style="color:var(--purple)">~14%</div>
+        <div class="pct-lbl">Clima extremo en origen o destino</div>
+      </div>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-title">📌 Implicación para el Departamento de Rutas</div>
+      Las dos categorías de mayor peso (aeronave tardía + carrier, ~62% combinado) están bajo control parcial de la aerolínea: optimizar las rotaciones de flota y garantizar disponibilidad de tripulaciones certificadas puede reducir los retrasos de las rutas REFORZAR sin necesidad de cancelarlas. Las rutas CANCELAR, en cambio, concentran los tres factores simultáneamente (hub congestionado + alta demanda + restricciones técnicas), haciendo que la mejora operacional tenga retorno mucho más limitado.
+    </div>
+
+    <h3>8.3 Variables recomendadas para un análisis futuro de segunda fase</h3>
+
+    <p>Para incrementar el poder predictivo de los modelos y confirmar estas hipótesis de causalidad, se recomienda incorporar las siguientes variables en una segunda fase del análisis:</p>
+
+    <div class="tbl-container">
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Fuente</th><th>Causa que permite detectar</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family:monospace">LATE_AIRCRAFT_DELAY</td>
+            <td style="color:var(--muted)">BTS On-Time dataset ampliado</td>
+            <td style="font-size:.85rem">Retraso heredado del vuelo anterior de la misma aeronave</td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace">CARRIER_DELAY</td>
+            <td style="color:var(--muted)">BTS On-Time dataset ampliado</td>
+            <td style="font-size:.85rem">Problemas de tripulación, mantenimiento o abordaje</td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace">NAS_DELAY</td>
+            <td style="color:var(--muted)">BTS On-Time dataset ampliado</td>
+            <td style="font-size:.85rem">Congestión del espacio aéreo gestionada por la FAA</td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace">WEATHER_DELAY</td>
+            <td style="color:var(--muted)">BTS On-Time dataset ampliado</td>
+            <td style="font-size:.85rem">Condiciones meteorológicas en origen o destino</td>
+          </tr>
+          <tr>
+            <td style="font-family:monospace">Ocupación del aeropuerto (hora)</td>
+            <td style="color:var(--muted)">FAA ASPM database</td>
+            <td style="font-size:.85rem">Nivel de congestión real del aeropuerto en el momento de salida</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <div class="sec-divider"></div>
+
+  <!-- ═══ SECCIÓN 9 — CONCLUSIONES ═══ -->
+  <section id="sec9">
+    <h2><span class="sec-num">9</span> Conclusiones y Recomendaciones Finales</h2>
+
+
+    <p>El análisis de 5,332,914 vuelos del año 2015 permite formular respuestas concretas y cuantificadas a la pregunta estratégica del CEO. Los hallazgos se resumen en cuatro conclusiones operacionales:</p>
+
+    <h3>8.1 La red tiene un problema concentrado, no generalizado</h3>
+    <p>Solo <strong>30 rutas</strong> (0.7% del total) requieren acción inmediata o urgente. El 99.3% restante opera dentro de rangos aceptables o manejables. Esto es una buena noticia: el problema de puntualidad de la aerolínea no es sistémico, sino localizado en un subconjunto específico de conexiones y aeropuertos-origen (especialmente EWR, IAH, DFW y ORD).</p>
+
+    <h3>8.2 La distancia no determina la puntualidad</h3>
+    <p>Con una correlación de Pearson de <strong>r = 0.023</strong>, los factores de congestión aeroportuaria, gestión de recursos y condiciones climáticas locales son determinantes mucho más relevantes que la longitud del trayecto. Las inversiones en mejoras operacionales deben dirigirse a los aeropuertos-hub problemáticos, no a rutas específicas por su distancia.</p>
+
+    <h3>8.3 El Score de Impacto es la métrica correcta para priorizar</h3>
+    <p>La ruta con mayor tasa de retraso bruta (EWR → PDX, 50%) tiene apenas 324 vuelos anuales. La ruta con mayor score de impacto (IAH → LAX, score 3.06) tiene 4,432 vuelos con una tasa del 36.4%. <strong>Cancelar IAH → LAX beneficia a ~13 veces más pasajeros</strong> que cancelar EWR → PDX. El score logarítmico captura esta prioridad correctamente.</p>
+
+    <h3>8.4 El modelo de ML valida la coherencia del análisis</h3>
+    <p>La precisión del <strong>81.1%</strong> del Árbol de Decisión, coherente con el 81.3% del baseline, confirma que los retrasos son fenómenos de alta variabilidad no completamente capturados por variables temporales y de distancia. Esto refuerza el enfoque del análisis: en lugar de predecir vuelos individuales, la metodología correcta es <em>identificar rutas estructuralmente problemáticas</em> usando estadísticas históricas agregadas — exactamente lo que el score de impacto implementa.</p>
+
+    <div class="conclusion-box">
+      <p>
+        "Cancelar las <strong>5 rutas con categoría CANCELAR</strong> y reforzar operaciones en las
+        <strong>25 rutas con categoría REFORZAR</strong> reduciría la exposición al riesgo reputacional
+        y mejoraría significativamente la experiencia de pasajeros en las conexiones de mayor volumen.
+        El entregable <strong>analisis_rutas_ceo.csv</strong> contiene las 4,085 rutas priorizadas y
+        listas para su revisión por parte del Departamento de Operaciones."
+      </p>
+    </div>
+
+    <footer>
+      <span>Michael Morante &amp; German Chamorro · American Regional Airways · USTA 2026-I</span>
+      <span>Dataset: Bureau of Transportation Statistics · 5,332,914 vuelos · 2015</span>
+    </footer>
+  </section>
+
+</main>
+
+<script>
+  /* Active nav link on scroll */
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Archivos demasiado grandes para GitHub
+data/flights_2015_full.csv
+data/train_prepared.parquet/
+data/test_prepared.parquet/
+
+# Checkpoints de Jupyter (archivos temporales)
+**/.ipynb_checkpoints/
+
+# Archivos de sistema Windows
+Thumbs.db
+desktop.ini
